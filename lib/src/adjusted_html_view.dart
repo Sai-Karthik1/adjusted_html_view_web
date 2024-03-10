@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'dart:ui_web' as ui;
+
 // ignore: avoid_web_libraries_in_flutter
 import 'dart:html';
 
@@ -28,13 +29,14 @@ class AdjustedHtmlView extends StatefulWidget {
 
   /// Classes to add to the Outer [DivElement].
   final List<String> customClasses;
-  const AdjustedHtmlView(
-      {Key? key,
-      required this.htmlText,
-      this.useDefaultStyle = true,
-      this.htmlValidator,
-      this.customClasses = const []})
+
+  const AdjustedHtmlView({Key? key,
+    required this.htmlText,
+    this.useDefaultStyle = true,
+    this.htmlValidator,
+    this.customClasses = const []})
       : super(key: key);
+
   @override
   State<StatefulWidget> createState() => _AdjustedHtmlViewState();
 }
@@ -55,17 +57,17 @@ class _AdjustedHtmlViewState extends State<AdjustedHtmlView> {
     super.didChangeDependencies();
     initTimer =
         Timer.periodic(Duration(milliseconds: initTimerIntervalms), (timer) {
-      final root = (window.document.getElementById(rootId) as DivElement?);
-      if (root != null && root.clientHeight > htmlHeight) {
-        setState(() {
-          htmlHeight = root.clientHeight.toDouble();
+          final root = (window.document.getElementById(rootId) as DivElement?);
+          if (root != null && root.clientHeight > htmlHeight) {
+            setState(() {
+              htmlHeight = root.clientHeight.toDouble();
+            });
+          }
+          timerLimitCount++;
+          if (timerLimitCount > initTimerTimeoutms / initTimerIntervalms) {
+            timer.cancel();
+          }
         });
-      }
-      timerLimitCount++;
-      if (timerLimitCount > initTimerTimeoutms / initTimerIntervalms) {
-        timer.cancel();
-      }
-    });
   }
 
   @override
@@ -76,17 +78,33 @@ class _AdjustedHtmlViewState extends State<AdjustedHtmlView> {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
+    final textTheme = Theme
+        .of(context)
+        .textTheme;
     // ignore: undefined_prefixed_name
     ui.platformViewRegistry.registerViewFactory(viewType, (viewId) {
       final element = DivElement();
       element.id = rootId;
       element.classes.addAll(widget.customClasses);
-      element.setInnerHtml(
-          (widget.useDefaultStyle ? _getDefaultStyle(textTheme, rootId) : "") +
+      element.setInnerHtml(widget.htmlText,
+          validator: NodeValidatorBuilder.common()
+            ..allowInlineStyles()
+            ..allowHtml5()
+            ..allowTextElements()
+            ..allowNavigation()
+            ..allowSvg()
+            ..allowElement("script",attributes: ["*"])
+            ..allowElement("style",attributes: ["*"])
+            ..allowElement("STYLE",attributes: ["*"])
+            ..allowElement("LINK",attributes: ["*"])
+            ..allowElement("link",attributes: ["*"])
+            ..allowElement("meta",attributes: ["*"])
+            ..allowElement("META",attributes: ["*"])
+
+        /*(widget.useDefaultStyle ? _getDefaultStyle(textTheme, rootId) : "") +
               widget.htmlText,
           validator: widget.htmlValidator?.validator ??
-              HtmlValidator.loose().validator);
+              HtmlValidator.loose().validator*/);
       element.style.height = "max-content";
       element.style.overflow = "hidden";
       element.style.userSelect = "text";
@@ -134,21 +152,19 @@ class HtmlValidator {
 
   HtmlValidator.loose()
       : validator = NodeValidatorBuilder.common()
-          ..allowInlineStyles()
-          ..allowElement("a", attributes: ["*"])
-          ..allowElement("img", attributes: ["*"])
-          ..allowElement("style", attributes: ["*"]);
+    ..allowInlineStyles()
+    ..allowElement("a", attributes: ["*"])..allowElement(
+        "img", attributes: ["*"])..allowElement("style", attributes: ["*"]);
 
   /// Allow iframe and script for embedding.
   /// Don't use this for HTML retrieved from the network.
   HtmlValidator.unsafe()
       : validator = NodeValidatorBuilder.common()
-          ..allowInlineStyles()
-          ..allowElement("a", attributes: ["*"])
-          ..allowElement("img", attributes: ["*"])
-          ..allowElement("style", attributes: ["*"])
-          ..allowElement("iframe", attributes: ["*"])
-          ..allowElement("script", attributes: ["*"]);
+    ..allowInlineStyles()
+    ..allowElement("a", attributes: ["*"])..allowElement(
+        "img", attributes: ["*"])..allowElement(
+        "style", attributes: ["*"])..allowElement(
+        "iframe", attributes: ["*"])..allowElement("script", attributes: ["*"]);
 
   HtmlValidator.custom(this.validator);
 }
