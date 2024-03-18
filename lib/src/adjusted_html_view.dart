@@ -100,6 +100,8 @@ class _AdjustedHtmlViewState extends State<AdjustedHtmlView> {
             ..allowElement("link",attributes: ["*"])
             ..allowElement("meta",attributes: ["*"])
             ..allowElement("META",attributes: ["*"])
+            ..allowElement("IMG",attributes: ["*"])
+            ..allowElement("img",attributes: ["*"])
 
         /*(widget.useDefaultStyle ? _getDefaultStyle(textTheme, rootId) : "") +
               widget.htmlText,
