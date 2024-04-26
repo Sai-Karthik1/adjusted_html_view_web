@@ -7,6 +7,12 @@ import 'dart:ui_web' as ui;
 import 'dart:html';
 
 import 'package:uuid/uuid.dart';
+class ItemUrlPolicy implements UriPolicy {
+
+  bool allowsUri(String uri) {
+    return true;
+  }
+}
 
 /// A HTML viewer that can adjust html's display size.
 class AdjustedHtmlView extends StatefulWidget {
@@ -87,11 +93,12 @@ class _AdjustedHtmlViewState extends State<AdjustedHtmlView> {
       element.id = rootId;
       element.classes.addAll(widget.customClasses);
       element.setInnerHtml(widget.htmlText,
-          validator: NodeValidatorBuilder.common()
+          validator: NodeValidatorBuilder()
             ..allowInlineStyles()
-            ..allowHtml5()
+            ..allowHtml5(uriPolicy: ItemUrlPolicy())
             ..allowTextElements()
-            ..allowNavigation()
+            ..allowNavigation(ItemUrlPolicy())
+            ..allowImages(ItemUrlPolicy())
             ..allowSvg()
             ..allowElement("script",attributes: ["*"])
             ..allowElement("style",attributes: ["*"])
