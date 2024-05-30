@@ -141,7 +141,7 @@ String _getDefaultStyle(TextTheme textTheme, String rootId) {
 #$rootId {
   font-family: 'Roboto', sans-serif;
   line-height: 1.5;
-  color: ${_colorToHex(textTheme.bodyText1?.color) ?? "#000000"};
+  color: ${_colorToHex(textTheme.bodyMedium?.color) ?? "#000000"};
 }
 </style>
 """;
